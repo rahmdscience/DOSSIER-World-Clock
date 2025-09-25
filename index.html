@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jam Dunia Interaktif</title>
+
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tone.js for sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+
+    <!-- Lucide Icons for UI elements -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <style>
+      /* Custom styles for the application */
+      :root {
+        --bg-dark: #121212; /* Rich Black */
+        --card-bg-dark: rgba(26, 26, 26, 0.5); /* #1A1A1A with alpha */
+        --text-dark: #eaeaea;
+        --text-muted-dark: #888888;
+        --accent: #c0a062; /* Soft Gold/Bronze */
+        --accent-hover: #d4af7a;
+        --border-dark: rgba(255, 255, 255, 0.15);
+      }
+
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-dark);
+      }
+
+      .main-title {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        font-weight: 700;
+      }
+
+      .glassmorphism {
+        background: var(--card-bg-dark);
+        border: 1px solid var(--border-dark);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+
+      .tab-active {
+        color: var(--accent);
+        border-bottom-color: var(--accent) !important;
+        font-weight: 600;
+      }
+
+      /* Hide number input spinners */
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+
+      /* Fade-in animation */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      .clock-list-item {
+        border-left: 3px solid transparent;
+        transition: background-color 0.2s ease-in-out,
+          border-color 0.2s ease-in-out;
+      }
+      .clock-list-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      .clock-list-item-active {
+        border-left-color: var(--accent) !important;
+        background-color: rgba(192, 160, 98, 0.1) !important;
+      }
+      .clock-list-item-active .font-semibold {
+        color: var(--accent);
+      }
+      .clock-list-item .remove-clock-btn {
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+      }
+      .clock-list-item:hover .remove-clock-btn {
+        opacity: 0.7;
+      }
+
+      /* Custom scrollbar for dropdown */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.4);
+      }
+
+      /* Custom Dropdown Styling */
+      .custom-select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23C0A062' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 1.5em;
+        padding-right: 2.5rem;
+      }
+
+      .custom-select option {
+        background: var(--bg-dark);
+        color: var(--text-dark);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mx-auto p-4 md:p-8 flex flex-col h-screen">
+      <header class="w-full max-w-7xl mx-auto mb-6 flex-shrink-0">
+        <div class="flex justify-between items-center">
+          <div class="flex items-end gap-4">
+            <h1 class="main-title text-3xl sm:text-4xl font-bold">
+              World Time
+            </h1>
+            <p
+              id="author-watermark"
+              class="text-sm text-slate-500 hover:text-[var(--accent)] cursor-pointer transition-colors duration-300 pb-1"
+            >
+              Created by Rahmad Sains
+            </p>
+          </div>
+          <div class="flex items-center space-x-2 md:space-x-4">
+            <button
+              id="format-toggle"
+              class="text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ring-[var(--accent)] bg-black/20 hover:bg-black/40 border border-slate-700/50 text-slate-300"
+            >
+              Format 24 Jam
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main
+        class="w-full max-w-7xl mx-auto glassmorphism rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 flex-grow flex flex-col"
+      >
+        <!-- Navigation Tabs -->
+        <nav class="border-b border-slate-700/50 mb-6 flex-shrink-0">
+          <ul
+            class="flex flex-wrap -mb-px text-center text-sm font-medium text-slate-400"
+          >
+            <li class="mr-2">
+              <button
+                class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg"
+                data-tab="world-clock"
+              >
+                Jam Dunia
+              </button>
+            </li>
+            <li class="mr-2">
+              <button
+                class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg"
+                data-tab="converter"
+              >
+                Konverter
+              </button>
+            </li>
+            <li class="mr-2">
+              <button
+                class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg"
+                data-tab="stopwatch"
+              >
+                Stopwatch
+              </button>
+            </li>
+            <li class="mr-2">
+              <button
+                class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg"
+                data-tab="timer"
+              >
+                Timer
+              </button>
+            </li>
+            <li>
+              <button
+                class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg"
+                data-tab="alarm"
+              >
+                Alarm
+              </button>
+            </li>
+          </ul>
+        </nav>
+
+        <!-- Content Panes -->
+        <div id="tab-content" class="flex-grow">
+          <!-- World Clock -->
+          <div id="world-clock" class="tab-pane h-full">
+            <div class="flex flex-col lg:flex-row gap-8 h-full">
+              <!-- Main Clock Display -->
+              <div
+                class="w-full lg:w-2/3 flex flex-col items-center justify-center p-4"
+              >
+                <div
+                  id="feature-clock-analog"
+                  class="w-full max-w-md mx-auto aspect-square"
+                >
+                  <canvas id="main-canvas"></canvas>
+                </div>
+                <div id="feature-clock-digital" class="text-center mt-4">
+                  <h2
+                    id="feature-clock-city"
+                    class="text-3xl md:text-4xl font-bold"
+                  ></h2>
+                  <p
+                    id="feature-clock-time"
+                    class="text-6xl md:text-7xl font-mono tracking-tighter"
+                  ></p>
+                  <p id="feature-clock-date" class="text-lg text-slate-400"></p>
+                </div>
+              </div>
+              <!-- Clock List & Controls -->
+              <div
+                class="w-full lg:w-1/3 border-t-2 lg:border-t-0 lg:border-l-2 border-slate-700/50 pt-6 lg:pt-0 lg:pl-8 flex flex-col"
+              >
+                <div class="flex items-center gap-2 w-full mb-4 flex-shrink-0">
+                  <!-- Custom Dropdown -->
+                  <div
+                    id="custom-select-container"
+                    class="relative flex-1 min-w-0"
+                  >
+                    <button
+                      id="custom-select-button"
+                      class="w-full text-left bg-black/20 border border-slate-700/50 rounded-lg p-2 focus:ring-2 focus:ring-[var(--accent)] outline-none text-slate-200 flex justify-between items-center"
+                    >
+                      <span id="custom-select-value">Pilih Kota...</span>
+                      <i
+                        data-lucide="chevron-down"
+                        class="transition-transform duration-200"
+                      ></i>
+                    </button>
+                    <div
+                      id="custom-select-options"
+                      class="absolute hidden mt-1 w-full glassmorphism rounded-lg z-10 max-h-60 overflow-y-auto custom-scrollbar transition-all duration-300 opacity-0 transform -translate-y-2"
+                    >
+                      <!-- Options will be dynamically inserted here -->
+                    </div>
+                  </div>
+                  <button
+                    id="add-clock-btn"
+                    class="!p-2 px-4 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--accent)]/80 hover:bg-[var(--accent)] text-white focus:ring-[var(--accent)]"
+                  >
+                    <i data-lucide="plus"></i>
+                  </button>
+                </div>
+                <div
+                  id="clocks-container"
+                  class="space-y-2 overflow-y-auto pr-2 flex-grow"
+                >
+                  <!-- Clock list items will be added here -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Converter -->
+          <div id="converter" class="tab-pane hidden h-full">
+            <div class="flex flex-col items-center justify-center h-full p-4">
+              <h3 class="text-2xl font-bold main-title mb-8">
+                Konverter Zona Waktu
+              </h3>
+              <div
+                class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 items-center gap-6"
+              >
+                <!-- From Time -->
+                <div class="flex flex-col gap-2">
+                  <label for="converter-from-select" class="font-semibold"
+                    >Dari:</label
+                  >
+                  <select
+                    id="converter-from-select"
+                    class="w-full bg-black/20 border border-slate-700/50 rounded-lg p-3 focus:ring-2 focus:ring-[var(--accent)] outline-none text-slate-200 custom-select"
+                  ></select>
+                  <input
+                    type="time"
+                    id="converter-from-time"
+                    class="w-full bg-black/20 border border-slate-700/50 rounded-lg p-3 focus:ring-2 focus:ring-[var(--accent)] outline-none text-slate-200"
+                  />
+                </div>
+
+                <!-- Icon -->
+                <div class="text-center">
+                  <i
+                    data-lucide="arrow-right-left"
+                    class="text-[var(--accent)] w-12 h-12 mx-auto"
+                  ></i>
+                </div>
+
+                <!-- To Time -->
+                <div class="flex flex-col gap-2">
+                  <label for="converter-to-select" class="font-semibold"
+                    >Ke:</label
+                  >
+                  <select
+                    id="converter-to-select"
+                    class="w-full bg-black/20 border border-slate-700/50 rounded-lg p-3 focus:ring-2 focus:ring-[var(--accent)] outline-none text-slate-200 custom-select"
+                  ></select>
+                  <div
+                    id="converter-to-time"
+                    class="w-full bg-black/30 border border-slate-700/50 rounded-lg p-3 text-2xl font-mono h-[54px] flex items-center"
+                  >
+                    --:--
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Other Panes -->
+          <div id="stopwatch" class="tab-pane hidden">
+            <div class="text-center">
+              <div
+                id="stopwatch-display"
+                class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8 tracking-tight"
+              >
+                00:00:00.000
+              </div>
+              <div class="flex justify-center space-x-4 mb-8">
+                <button
+                  id="sw-start-btn"
+                  class="w-24 px-4 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--accent)]/80 text-white hover:bg-[var(--accent)] focus:ring-[var(--accent)]"
+                >
+                  Mulai</button
+                ><button
+                  id="sw-lap-btn"
+                  class="w-24 px-4 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-slate-700 text-slate-100 hover:bg-slate-600 focus:ring-slate-500"
+                  disabled
+                >
+                  Lap</button
+                ><button
+                  id="sw-reset-btn"
+                  class="w-24 px-4 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-slate-700 text-slate-100 hover:bg-slate-600 focus:ring-slate-500"
+                  disabled
+                >
+                  Reset
+                </button>
+              </div>
+              <div
+                id="laps-container"
+                class="max-h-60 overflow-y-auto text-left mx-auto max-w-md"
+              >
+                <ul id="laps-list" class="space-y-2"></ul>
+              </div>
+            </div>
+          </div>
+          <div id="timer" class="tab-pane hidden">
+            <div class="text-center">
+              <div id="timer-display-container" class="hidden">
+                <div
+                  id="timer-display"
+                  class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8 tracking-tight"
+                >
+                  00:00:00
+                </div>
+              </div>
+              <div id="timer-setter-container" class="mb-6">
+                <div class="flex justify-center items-center gap-2 sm:gap-4">
+                  <div>
+                    <input
+                      type="number"
+                      id="timer-hours-input"
+                      min="0"
+                      max="99"
+                      value="00"
+                      class="w-20 sm:w-24 text-center text-4xl font-mono bg-slate-800/60 rounded-lg p-2 outline-none focus:ring-2 ring-inset focus:ring-[var(--accent)] border border-transparent text-slate-200"
+                    /><label class="block text-sm text-slate-400 mt-1"
+                      >Jam</label
+                    >
+                  </div>
+                  <span class="text-4xl font-mono pt-1">:</span>
+                  <div>
+                    <input
+                      type="number"
+                      id="timer-minutes-input"
+                      min="0"
+                      max="59"
+                      value="00"
+                      class="w-20 sm:w-24 text-center text-4xl font-mono bg-slate-800/60 rounded-lg p-2 outline-none focus:ring-2 ring-inset focus:ring-[var(--accent)] border border-transparent text-slate-200"
+                    /><label class="block text-sm text-slate-400 mt-1"
+                      >Menit</label
+                    >
+                  </div>
+                  <span class="text-4xl font-mono pt-1">:</span>
+                  <div>
+                    <input
+                      type="number"
+                      id="timer-seconds-input"
+                      min="0"
+                      max="59"
+                      value="00"
+                      class="w-20 sm:w-24 text-center text-4xl font-mono bg-slate-800/60 rounded-lg p-2 outline-none focus:ring-2 ring-inset focus:ring-[var(--accent)] border border-transparent text-slate-200"
+                    /><label class="block text-sm text-slate-400 mt-1"
+                      >Detik</label
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="flex justify-center space-x-4">
+                <button
+                  id="timer-start-btn"
+                  class="w-24 px-4 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--accent)]/80 text-white hover:bg-[var(--accent)] focus:ring-[var(--accent)]"
+                >
+                  Mulai</button
+                ><button
+                  id="timer-reset-btn"
+                  class="w-24 px-4 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-slate-700 text-slate-100 hover:bg-slate-600 focus:ring-slate-500 hidden"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+          <div id="alarm" class="tab-pane hidden">
+            <div class="max-w-md mx-auto">
+              <div class="p-4 bg-black/20 rounded-lg">
+                <div
+                  class="flex justify-center items-center gap-2 sm:gap-4 mb-4"
+                >
+                  <div>
+                    <input
+                      type="number"
+                      id="alarm-hours-input"
+                      min="0"
+                      max="23"
+                      value="00"
+                      class="w-20 sm:w-24 text-center text-4xl font-mono bg-slate-800/60 rounded-lg p-2 outline-none focus:ring-2 ring-inset focus:ring-[var(--accent)] border border-transparent text-slate-200"
+                    /><label class="block text-sm text-slate-400 mt-1"
+                      >Jam</label
+                    >
+                  </div>
+                  <span class="text-4xl font-mono pt-1">:</span>
+                  <div>
+                    <input
+                      type="number"
+                      id="alarm-minutes-input"
+                      min="0"
+                      max="59"
+                      value="00"
+                      class="w-20 sm:w-24 text-center text-4xl font-mono bg-slate-800/60 rounded-lg p-2 outline-none focus:ring-2 ring-inset focus:ring-[var(--accent)] border border-transparent text-slate-200"
+                    /><label class="block text-sm text-slate-400 mt-1"
+                      >Menit</label
+                    >
+                  </div>
+                </div>
+                <div class="flex items-center justify-center gap-4 mb-4">
+                  <input
+                    id="alarm-label-input"
+                    type="text"
+                    placeholder="Label alarm"
+                    class="bg-slate-800/60 border border-slate-700/60 text-slate-100 text-lg rounded-lg focus:ring-2 focus:ring-[var(--accent)] block w-full p-2.5"
+                  />
+                </div>
+                <div class="flex items-center justify-center gap-4">
+                  <select
+                    id="alarm-sound-select"
+                    class="flex-1 min-w-0 bg-slate-800/60 border border-slate-700/60 rounded-lg p-2.5 focus:ring-2 focus:ring-[var(--accent)] outline-none text-slate-200 custom-select"
+                  >
+                    <option value="default">Default</option>
+                    <option value="bell">Lonceng</option>
+                    <option value="harp">Harpa</option>
+                    <option value="classic">Klasik</option></select
+                  ><button
+                    id="add-alarm-btn"
+                    class="!p-3 px-4 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--accent)]/80 text-white hover:bg-[var(--accent)] focus:ring-[var(--accent)]"
+                  >
+                    <i data-lucide="plus"></i>
+                  </button>
+                </div>
+              </div>
+              <h3 class="text-xl font-semibold my-4 text-center">
+                Alarm Aktif
+              </h3>
+              <div id="alarms-list" class="space-y-3"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Alarm Modal -->
+    <div
+      id="alarm-modal"
+      class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50 opacity-0 transition-opacity duration-300"
+    >
+      <div
+        class="glassmorphism p-6 rounded-2xl shadow-xl max-w-sm w-full transform transition-transform duration-300 scale-95"
+      >
+        <div class="flex items-center mb-4">
+          <div class="bg-amber-900/50 p-2 rounded-full mr-4">
+            <i data-lucide="alarm-clock" class="text-amber-400"></i>
+          </div>
+          <h3 class="text-xl font-bold">Alarm</h3>
+        </div>
+        <p id="alarm-modal-message" class="mb-6 text-slate-300"></p>
+        <button
+          id="alarm-modal-close"
+          class="w-full px-4 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--accent)]/80 text-white hover:bg-[var(--accent)] focus:ring-[var(--accent)]"
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
+
+    <!-- Author Modal -->
+    <div
+      id="author-modal"
+      class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50 opacity-0 transition-opacity duration-300"
+    >
+      <div
+        class="glassmorphism p-6 rounded-2xl shadow-xl max-w-sm w-full transform transition-transform duration-300 scale-95 text-center"
+      >
+        <h3 class="text-2xl font-bold main-title mb-2">Rahmad Sains</h3>
+        <p class="text-slate-400 mb-6">Connect with me</p>
+        <div class="space-y-4">
+          <a
+            href="https://www.instagram.com/rahmdsai"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200 bg-black/20 hover:bg-black/40 border border-slate-700/50 text-slate-300"
+          >
+            <i data-lucide="instagram"></i>
+            <span>@rahmdsai</span>
+          </a>
+          <a
+            href="https://linktr.ee/rahmdsai"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200 bg-black/20 hover:bg-black/40 border border-slate-700/50 text-slate-300"
+          >
+            <i data-lucide="link"></i>
+            <span>Linktree</span>
+          </a>
+        </div>
+        <button
+          id="author-modal-close"
+          class="mt-8 w-full px-4 py-2 rounded-lg font-semibold transition-all duration-200 bg-[var(--accent)]/80 text-white hover:bg-[var(--accent)] focus:ring-[var(--accent)]"
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // --- Icon Initialization ---
+        lucide.createIcons();
+
+        // --- Global State ---
+        let is24HourFormat = true;
+        let clockUpdateInterval;
+        let activeTimezone = null;
+        let selectedTimezoneToAdd = null;
+
+        // --- DOM Elements ---
+        const formatToggle = document.getElementById("format-toggle");
+        const tabButtons = document.querySelectorAll(".tab-btn");
+        const tabPanes = document.querySelectorAll(".tab-pane");
+        const alarmModal = document.getElementById("alarm-modal");
+        const alarmModalMessage = document.getElementById(
+          "alarm-modal-message"
+        );
+        const alarmModalClose = document.getElementById("alarm-modal-close");
+        const authorWatermark = document.getElementById("author-watermark");
+        const authorModal = document.getElementById("author-modal");
+        const authorModalClose = document.getElementById("author-modal-close");
+
+        // --- Sound Effect Initialization ---
+        let alarmSynth;
+        const alarmSounds = {};
+        function initializeAudio() {
+          if (Tone.context.state !== "running") {
+            Tone.start();
+          }
+          if (!alarmSynth) {
+            alarmSounds.default = new Tone.MembraneSynth().toDestination();
+            alarmSounds.bell = new Tone.MetalSynth({
+              frequency: 200,
+              envelope: { attack: 0.001, decay: 1.4, release: 0.2 },
+              harmonicity: 5.1,
+              modulationIndex: 32,
+              resonance: 4000,
+              octaves: 1.5,
+            }).toDestination();
+            alarmSounds.harp = new Tone.PluckSynth().toDestination();
+            alarmSounds.classic = new Tone.Synth({
+              oscillator: { type: "triangle" },
+              envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 },
+            }).toDestination();
+          }
+        }
+        document.body.addEventListener("click", initializeAudio, {
+          once: true,
+        });
+        document.body.addEventListener("touchstart", initializeAudio, {
+          once: true,
+        });
+
+        // --- Format Management ---
+        formatToggle.addEventListener("click", () => {
+          is24HourFormat = !is24HourFormat;
+          formatToggle.textContent = is24HourFormat
+            ? "Format 24 Jam"
+            : "Format 12 Jam";
+          renderAlarms();
+          updateFeatureClock();
+        });
+
+        // --- Tab Navigation ---
+        tabButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            const targetTab = button.dataset.tab;
+            tabButtons.forEach((btn) => btn.classList.remove("tab-active"));
+            button.classList.add("tab-active");
+            tabPanes.forEach((pane) => {
+              const isTarget = pane.id === targetTab;
+              if (isTarget) {
+                pane.classList.remove("hidden");
+                pane.classList.add("fade-in");
+              } else {
+                pane.classList.add("hidden");
+                pane.classList.remove("fade-in");
+              }
+            });
+          });
+        });
+        document
+          .querySelector('.tab-btn[data-tab="world-clock"]')
+          .classList.add("tab-active");
+
+        // --- World Clock ---
+        const addClockBtn = document.getElementById("add-clock-btn");
+        const clocksContainer = document.getElementById("clocks-container");
+        let displayedTimezones = new Set();
+        const mainCanvas = document.getElementById("main-canvas");
+        const customSelectContainer = document.getElementById(
+          "custom-select-container"
+        );
+        const customSelectButton = document.getElementById(
+          "custom-select-button"
+        );
+        const customSelectValue = document.getElementById(
+          "custom-select-value"
+        );
+        const customSelectOptions = document.getElementById(
+          "custom-select-options"
+        );
+
+        const popularTimezones = [
+          { city: "New York", country: "AS", timezone: "America/New_York" },
+          { city: "Chicago", country: "AS", timezone: "America/Chicago" },
+          { city: "Denver", country: "AS", timezone: "America/Denver" },
+          { city: "Phoenix", country: "AS", timezone: "America/Phoenix" },
+          {
+            city: "Los Angeles",
+            country: "AS",
+            timezone: "America/Los_Angeles",
+          },
+          { city: "Anchorage", country: "AS", timezone: "America/Anchorage" },
+          { city: "Honolulu", country: "AS", timezone: "Pacific/Honolulu" },
+          { city: "Toronto", country: "Kanada", timezone: "America/Toronto" },
+          {
+            city: "Vancouver",
+            country: "Kanada",
+            timezone: "America/Vancouver",
+          },
+          { city: "Edmonton", country: "Kanada", timezone: "America/Edmonton" },
+          { city: "Winnipeg", country: "Kanada", timezone: "America/Winnipeg" },
+          { city: "Montreal", country: "Kanada", timezone: "America/Montreal" },
+          {
+            city: "Mexico City",
+            country: "Meksiko",
+            timezone: "America/Mexico_City",
+          },
+          {
+            city: "São Paulo",
+            country: "Brasil",
+            timezone: "America/Sao_Paulo",
+          },
+          {
+            city: "Rio de Janeiro",
+            country: "Brasil",
+            timezone: "America/Sao_Paulo",
+          },
+          {
+            city: "Buenos Aires",
+            country: "Argentina",
+            timezone: "America/Argentina/Buenos_Aires",
+          },
+          { city: "Lima", country: "Peru", timezone: "America/Lima" },
+          { city: "Bogotá", country: "Kolombia", timezone: "America/Bogota" },
+          { city: "Santiago", country: "Chili", timezone: "America/Santiago" },
+          {
+            city: "Caracas",
+            country: "Venezuela",
+            timezone: "America/Caracas",
+          },
+          { city: "Kingston", country: "Jamaika", timezone: "America/Jamaica" },
+          { city: "Havana", country: "Kuba", timezone: "America/Havana" },
+          {
+            city: "Guatemala City",
+            country: "Guatemala",
+            timezone: "America/Guatemala",
+          },
+          {
+            city: "Panama City",
+            country: "Panama",
+            timezone: "America/Panama",
+          },
+          {
+            city: "San Jose",
+            country: "Kosta Rika",
+            timezone: "America/Costa_Rica",
+          },
+          { city: "London", country: "Inggris", timezone: "Europe/London" },
+          { city: "Manchester", country: "Inggris", timezone: "Europe/London" },
+          {
+            city: "Edinburgh",
+            country: "Skotlandia",
+            timezone: "Europe/London",
+          },
+          { city: "Dublin", country: "Irlandia", timezone: "Europe/Dublin" },
+          { city: "Lisbon", country: "Portugal", timezone: "Europe/Lisbon" },
+          { city: "Paris", country: "Prancis", timezone: "Europe/Paris" },
+          { city: "Marseille", country: "Prancis", timezone: "Europe/Paris" },
+          { city: "Berlin", country: "Jerman", timezone: "Europe/Berlin" },
+          { city: "Munich", country: "Jerman", timezone: "Europe/Berlin" },
+          { city: "Hamburg", country: "Jerman", timezone: "Europe/Berlin" },
+          { city: "Frankfurt", country: "Jerman", timezone: "Europe/Berlin" },
+          { city: "Roma", country: "Italia", timezone: "Europe/Rome" },
+          { city: "Milan", country: "Italia", timezone: "Europe/Rome" },
+          { city: "Madrid", country: "Spanyol", timezone: "Europe/Madrid" },
+          { city: "Barcelona", country: "Spanyol", timezone: "Europe/Madrid" },
+          {
+            city: "Amsterdam",
+            country: "Belanda",
+            timezone: "Europe/Amsterdam",
+          },
+          { city: "Brussels", country: "Belgia", timezone: "Europe/Brussels" },
+          { city: "Zurich", country: "Swiss", timezone: "Europe/Zurich" },
+          { city: "Geneva", country: "Swiss", timezone: "Europe/Zurich" },
+          { city: "Vienna", country: "Austria", timezone: "Europe/Vienna" },
+          { city: "Prague", country: "Ceko", timezone: "Europe/Prague" },
+          {
+            city: "Budapest",
+            country: "Hungaria",
+            timezone: "Europe/Budapest",
+          },
+          { city: "Warsaw", country: "Polandia", timezone: "Europe/Warsaw" },
+          {
+            city: "Copenhagen",
+            country: "Denmark",
+            timezone: "Europe/Copenhagen",
+          },
+          { city: "Oslo", country: "Norwegia", timezone: "Europe/Oslo" },
+          {
+            city: "Stockholm",
+            country: "Swedia",
+            timezone: "Europe/Stockholm",
+          },
+          {
+            city: "Helsinki",
+            country: "Finlandia",
+            timezone: "Europe/Helsinki",
+          },
+          {
+            city: "Reykjavik",
+            country: "Islandia",
+            timezone: "Atlantic/Reykjavik",
+          },
+          { city: "Moskow", country: "Rusia", timezone: "Europe/Moscow" },
+          {
+            city: "St. Petersburg",
+            country: "Rusia",
+            timezone: "Europe/Moscow",
+          },
+          { city: "Kyiv", country: "Ukraina", timezone: "Europe/Kiev" },
+          {
+            city: "Bucharest",
+            country: "Romania",
+            timezone: "Europe/Bucharest",
+          },
+          { city: "Istanbul", country: "Turki", timezone: "Europe/Istanbul" },
+          { city: "Athena", country: "Yunani", timezone: "Europe/Athens" },
+          { city: "Jakarta", country: "Indonesia", timezone: "Asia/Jakarta" },
+          { city: "Surabaya", country: "Indonesia", timezone: "Asia/Jakarta" },
+          { city: "Makassar", country: "Indonesia", timezone: "Asia/Makassar" },
+          { city: "Tokyo", country: "Jepang", timezone: "Asia/Tokyo" },
+          { city: "Osaka", country: "Jepang", timezone: "Asia/Tokyo" },
+          { city: "Sapporo", country: "Jepang", timezone: "Asia/Tokyo" },
+          { city: "Seoul", country: "Korea Selatan", timezone: "Asia/Seoul" },
+          { city: "Busan", country: "Korea Selatan", timezone: "Asia/Seoul" },
+          {
+            city: "Pyongyang",
+            country: "Korea Utara",
+            timezone: "Asia/Pyongyang",
+          },
+          { city: "Beijing", country: "Tiongkok", timezone: "Asia/Shanghai" },
+          { city: "Shanghai", country: "Tiongkok", timezone: "Asia/Shanghai" },
+          { city: "Guangzhou", country: "Tiongkok", timezone: "Asia/Shanghai" },
+          { city: "Shenzhen", country: "Tiongkok", timezone: "Asia/Shanghai" },
+          {
+            city: "Hong Kong",
+            country: "Tiongkok",
+            timezone: "Asia/Hong_Kong",
+          },
+          { city: "Taipei", country: "Taiwan", timezone: "Asia/Taipei" },
+          {
+            city: "Singapura",
+            country: "Singapura",
+            timezone: "Asia/Singapore",
+          },
+          {
+            city: "Kuala Lumpur",
+            country: "Malaysia",
+            timezone: "Asia/Kuala_Lumpur",
+          },
+          { city: "Bangkok", country: "Thailand", timezone: "Asia/Bangkok" },
+          { city: "Manila", country: "Filipina", timezone: "Asia/Manila" },
+          {
+            city: "Ho Chi Minh",
+            country: "Vietnam",
+            timezone: "Asia/Ho_Chi_Minh",
+          },
+          { city: "Hanoi", country: "Vietnam", timezone: "Asia/Bangkok" },
+          { city: "Mumbai", country: "India", timezone: "Asia/Kolkata" },
+          { city: "New Delhi", country: "India", timezone: "Asia/Kolkata" },
+          { city: "Bangalore", country: "India", timezone: "Asia/Kolkata" },
+          { city: "Kolkata", country: "India", timezone: "Asia/Kolkata" },
+          { city: "Karachi", country: "Pakistan", timezone: "Asia/Karachi" },
+          { city: "Lahore", country: "Pakistan", timezone: "Asia/Karachi" },
+          { city: "Dhaka", country: "Bangladesh", timezone: "Asia/Dhaka" },
+          { city: "Kathmandu", country: "Nepal", timezone: "Asia/Kathmandu" },
+          { city: "Colombo", country: "Sri Lanka", timezone: "Asia/Colombo" },
+          { city: "Yangon", country: "Myanmar", timezone: "Asia/Yangon" },
+          { city: "Dubai", country: "UEA", timezone: "Asia/Dubai" },
+          { city: "Abu Dhabi", country: "UEA", timezone: "Asia/Dubai" },
+          { city: "Riyadh", country: "Arab Saudi", timezone: "Asia/Riyadh" },
+          { city: "Jeddah", country: "Arab Saudi", timezone: "Asia/Riyadh" },
+          { city: "Doha", country: "Qatar", timezone: "Asia/Qatar" },
+          { city: "Kuwait City", country: "Kuwait", timezone: "Asia/Kuwait" },
+          { city: "Baghdad", country: "Irak", timezone: "Asia/Baghdad" },
+          { city: "Tehran", country: "Iran", timezone: "Asia/Tehran" },
+          {
+            city: "Tashkent",
+            country: "Uzbekistan",
+            timezone: "Asia/Tashkent",
+          },
+          { city: "Almaty", country: "Kazakhstan", timezone: "Asia/Almaty" },
+          { city: "Baku", country: "Azerbaijan", timezone: "Asia/Baku" },
+          { city: "Tbilisi", country: "Georgia", timezone: "Asia/Tbilisi" },
+          { city: "Yerevan", country: "Armenia", timezone: "Asia/Yerevan" },
+          { city: "Tel Aviv", country: "Israel", timezone: "Asia/Jerusalem" },
+          { city: "Kairo", country: "Mesir", timezone: "Africa/Cairo" },
+          { city: "Alexandria", country: "Mesir", timezone: "Africa/Cairo" },
+          {
+            city: "Johannesburg",
+            country: "Afrika Selatan",
+            timezone: "Africa/Johannesburg",
+          },
+          {
+            city: "Cape Town",
+            country: "Afrika Selatan",
+            timezone: "Africa/Johannesburg",
+          },
+          {
+            city: "Durban",
+            country: "Afrika Selatan",
+            timezone: "Africa/Johannesburg",
+          },
+          {
+            city: "Pretoria",
+            country: "Afrika Selatan",
+            timezone: "Africa/Johannesburg",
+          },
+          { city: "Lagos", country: "Nigeria", timezone: "Africa/Lagos" },
+          { city: "Nairobi", country: "Kenya", timezone: "Africa/Nairobi" },
+          {
+            city: "Casablanca",
+            country: "Maroko",
+            timezone: "Africa/Casablanca",
+          },
+          { city: "Rabat", country: "Maroko", timezone: "Africa/Casablanca" },
+          { city: "Algiers", country: "Aljazair", timezone: "Africa/Algiers" },
+          { city: "Tunis", country: "Tunisia", timezone: "Africa/Tunis" },
+          { city: "Accra", country: "Ghana", timezone: "Africa/Accra" },
+          {
+            city: "Addis Ababa",
+            country: "Etiopia",
+            timezone: "Africa/Addis_Ababa",
+          },
+          { city: "Kinshasa", country: "Kongo", timezone: "Africa/Kinshasa" },
+          { city: "Dakar", country: "Senegal", timezone: "Africa/Dakar" },
+          {
+            city: "Abidjan",
+            country: "Pantai Gading",
+            timezone: "Africa/Abidjan",
+          },
+          { city: "Luanda", country: "Angola", timezone: "Africa/Luanda" },
+          {
+            city: "Sydney",
+            country: "Australia",
+            timezone: "Australia/Sydney",
+          },
+          {
+            city: "Melbourne",
+            country: "Australia",
+            timezone: "Australia/Melbourne",
+          },
+          {
+            city: "Brisbane",
+            country: "Australia",
+            timezone: "Australia/Brisbane",
+          },
+          { city: "Perth", country: "Australia", timezone: "Australia/Perth" },
+          {
+            city: "Adelaide",
+            country: "Australia",
+            timezone: "Australia/Adelaide",
+          },
+          {
+            city: "Canberra",
+            country: "Australia",
+            timezone: "Australia/Sydney",
+          },
+          {
+            city: "Darwin",
+            country: "Australia",
+            timezone: "Australia/Darwin",
+          },
+          {
+            city: "Hobart",
+            country: "Australia",
+            timezone: "Australia/Hobart",
+          },
+          {
+            city: "Auckland",
+            country: "Selandia Baru",
+            timezone: "Pacific/Auckland",
+          },
+          {
+            city: "Wellington",
+            country: "Selandia Baru",
+            timezone: "Pacific/Auckland",
+          },
+          {
+            city: "Christchurch",
+            country: "Selandia Baru",
+            timezone: "Pacific/Auckland",
+          },
+          { city: "Suva", country: "Fiji", timezone: "Pacific/Fiji" },
+          {
+            city: "Port Moresby",
+            country: "Papua Nugini",
+            timezone: "Pacific/Port_Moresby",
+          },
+        ];
+
+        const updateTimezoneDropdown = () => {
+          customSelectOptions.innerHTML = "";
+          let availableOptions = 0;
+          popularTimezones
+            .sort((a, b) => a.city.localeCompare(b.city))
+            .forEach((tz) => {
+              if (!displayedTimezones.has(tz.timezone)) {
+                availableOptions++;
+                const option = document.createElement("div");
+                option.className =
+                  "p-2 cursor-pointer hover:bg-amber-600/20 rounded-md";
+                option.dataset.value = tz.timezone;
+                option.textContent = `${tz.city}, ${tz.country}`;
+                option.addEventListener("click", () => {
+                  selectedTimezoneToAdd = tz.timezone;
+                  customSelectValue.textContent = `${tz.city}, ${tz.country}`;
+                  toggleDropdown(false);
+                });
+                customSelectOptions.appendChild(option);
+              }
+            });
+
+          if (availableOptions > 0) {
+            const firstOption = customSelectOptions.firstChild;
+            if (
+              !selectedTimezoneToAdd ||
+              displayedTimezones.has(selectedTimezoneToAdd)
+            ) {
+              selectedTimezoneToAdd = firstOption.dataset.value;
+              customSelectValue.textContent = firstOption.textContent;
+            }
+          } else {
+            customSelectValue.textContent = "Semua kota ditampilkan";
+          }
+          addClockBtn.disabled = availableOptions === 0;
+        };
+
+        const createClockListItem = (timezone, displayName) => {
+          const listItem = document.createElement("div");
+          listItem.className =
+            "clock-list-item p-3 rounded-lg flex justify-between items-center cursor-pointer border-l-4 border-transparent";
+          listItem.dataset.timezone = timezone;
+          listItem.innerHTML = `
+                <div>
+                    <p class="font-semibold">${displayName.split(",")[0]}</p>
+                    <p class="text-sm text-slate-400 gmt-offset"></p>
+                </div>
+                <div class="flex items-center">
+                     <button class="remove-clock-btn text-slate-500 hover:text-red-500 transition-colors"><i data-lucide="x-circle" class="w-5 h-5"></i></button>
+                </div>
+             `;
+
+          listItem.addEventListener("click", (e) => {
+            if (!e.target.closest(".remove-clock-btn")) {
+              activeTimezone = timezone;
+            }
+          });
+
+          listItem
+            .querySelector(".remove-clock-btn")
+            .addEventListener("click", (e) => {
+              e.stopPropagation();
+              displayedTimezones.delete(timezone);
+              clocksContainer.removeChild(listItem);
+              if (activeTimezone === timezone && displayedTimezones.size > 0) {
+                activeTimezone = displayedTimezones.values().next().value;
+              } else if (displayedTimezones.size === 0) {
+                activeTimezone = null;
+              }
+              updateTimezoneDropdown();
+            });
+          return listItem;
+        };
+
+        const getGmtOffsetString = (timezone) => {
+          try {
+            const formatter = new Intl.DateTimeFormat("en-US", {
+              timeZone: timezone,
+              timeZoneName: "longOffset",
+            });
+            const parts = formatter.formatToParts(new Date());
+            return (
+              parts.find((part) => part.type === "timeZoneName")?.value || ""
+            );
+          } catch (e) {
+            return "";
+          }
+        };
+
+        function updateFeatureClock() {
+          if (!activeTimezone) {
+            document.getElementById("feature-clock-city").textContent =
+              "Pilih Kota";
+            document.getElementById("feature-clock-time").textContent =
+              "--:--:--";
+            document.getElementById("feature-clock-date").textContent = "";
+            const ctx = mainCanvas.getContext("2d");
+            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            return;
+          }
+
+          document.querySelectorAll("#clocks-container > div").forEach((el) => {
+            el.classList.toggle(
+              "clock-list-item-active",
+              el.dataset.timezone === activeTimezone
+            );
+          });
+
+          const tzObject = popularTimezones.find(
+            (tz) => tz.timezone === activeTimezone
+          );
+          const displayName = tzObject
+            ? `${tzObject.city}, ${tzObject.country}`
+            : activeTimezone.replace(/_/g, " ");
+
+          const now = new Date();
+          const timeString = now.toLocaleTimeString("en-US", {
+            timeZone: activeTimezone,
+            hour12: !is24HourFormat,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+          const dateString = now.toLocaleDateString("id-ID", {
+            timeZone: activeTimezone,
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+          const localTime = new Date(
+            now.toLocaleString("en-US", { timeZone: activeTimezone })
+          );
+
+          document.getElementById("feature-clock-city").textContent =
+            displayName;
+          document.getElementById("feature-clock-time").textContent =
+            timeString;
+          document.getElementById("feature-clock-date").textContent =
+            dateString;
+
+          drawAnalogClock(mainCanvas, localTime);
+        }
+
+        function drawAnalogClock(canvas, date) {
+          if (!canvas) return;
+          const ctx = canvas.getContext("2d");
+          const radius = canvas.width / 2;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          const numberColor = "rgba(234, 234, 234, 0.8)";
+          const handColor = numberColor;
+          const secondHandColor = "var(--accent)";
+
+          ctx.translate(radius, radius);
+          const scale = radius * 0.9;
+          ctx.scale(scale / 100, scale / 100);
+
+          ctx.beginPath();
+          ctx.arc(0, 0, 4, 0, 2 * Math.PI);
+          ctx.fillStyle = handColor;
+          ctx.fill();
+
+          for (let i = 0; i < 12; i++) {
+            const angle = ((i - 3) * (Math.PI * 2)) / 12;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            const x1 = Math.cos(angle) * 85;
+            const y1 = Math.sin(angle) * 85;
+            const x2 = Math.cos(angle) * 95;
+            const y2 = Math.sin(angle) * 95;
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = numberColor;
+            ctx.stroke();
+          }
+
+          const hour = date.getHours() % 12;
+          const minute = date.getMinutes();
+          const second = date.getSeconds();
+          const millisecond = date.getMilliseconds();
+
+          const hourAngle =
+            (hour * Math.PI) / 6 +
+            (minute * Math.PI) / (6 * 60) +
+            (second * Math.PI) / (360 * 60);
+          drawHand(ctx, hourAngle, 55, 7, handColor);
+
+          const minuteAngle =
+            (minute * Math.PI) / 30 + (second * Math.PI) / (30 * 60);
+          drawHand(ctx, minuteAngle, 80, 5, handColor);
+
+          const secondAngle =
+            (second * Math.PI) / 30 + (millisecond * Math.PI) / (30 * 1000);
+          drawHand(ctx, secondAngle, 90, 2, secondHandColor);
+
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+
+        function drawHand(ctx, pos, length, width, color) {
+          ctx.beginPath();
+          ctx.lineWidth = width;
+          ctx.lineCap = "round";
+          ctx.strokeStyle = color;
+          ctx.moveTo(0, 0);
+          ctx.rotate(pos);
+          ctx.lineTo(0, -length);
+          ctx.stroke();
+          ctx.rotate(-pos);
+        }
+
+        const setupMainCanvas = () => {
+          const size = mainCanvas.parentElement.offsetWidth;
+          mainCanvas.width = size * 2;
+          mainCanvas.height = size * 2;
+          mainCanvas.style.width = `${size}px`;
+          mainCanvas.style.height = `${size}px`;
+        };
+
+        const startClockUpdates = () => {
+          if (clockUpdateInterval) cancelAnimationFrame(clockUpdateInterval);
+          function tick() {
+            updateFeatureClock();
+            clockUpdateInterval = requestAnimationFrame(tick);
+          }
+          tick();
+        };
+
+        function addClock(timezoneValue) {
+          if (!timezoneValue || displayedTimezones.has(timezoneValue)) return;
+          const selectedTzObject = popularTimezones.find(
+            (tz) => tz.timezone === timezoneValue
+          );
+          const displayName = selectedTzObject
+            ? `${selectedTzObject.city}, ${selectedTzObject.country}`
+            : timezoneValue.replace(/_/g, " ");
+
+          displayedTimezones.add(timezoneValue);
+          const newClockItem = createClockListItem(timezoneValue, displayName);
+          newClockItem.querySelector(".gmt-offset").textContent =
+            getGmtOffsetString(timezoneValue);
+          clocksContainer.appendChild(newClockItem);
+          lucide.createIcons();
+
+          if (displayedTimezones.size === 1) {
+            activeTimezone = timezoneValue;
+          }
+
+          updateTimezoneDropdown();
+          updateFeatureClock();
+        }
+
+        const toggleDropdown = (force) => {
+          const isOpen = customSelectOptions.classList.contains("hidden");
+          const icon = customSelectButton.querySelector("svg");
+          if (force === true || (force !== false && isOpen)) {
+            customSelectOptions.classList.remove("hidden");
+            setTimeout(() => {
+              customSelectOptions.classList.remove(
+                "opacity-0",
+                "-translate-y-2"
+              );
+            }, 10);
+            if (icon) icon.style.transform = "rotate(180deg)";
+          } else {
+            customSelectOptions.classList.add("opacity-0", "-translate-y-2");
+            setTimeout(() => {
+              customSelectOptions.classList.add("hidden");
+            }, 300);
+            if (icon) icon.style.transform = "rotate(0deg)";
+          }
+        };
+
+        customSelectButton.addEventListener("click", () => toggleDropdown());
+        addClockBtn.addEventListener("click", () =>
+          addClock(selectedTimezoneToAdd)
+        );
+        window.addEventListener("click", (e) => {
+          if (!customSelectContainer.contains(e.target)) {
+            toggleDropdown(false);
+          }
+        });
+
+        // --- Stopwatch, Timer, Alarm (logic remains largely the same) ---
+        const swDisplay = document.getElementById("stopwatch-display");
+        const swStartBtn = document.getElementById("sw-start-btn");
+        const swLapBtn = document.getElementById("sw-lap-btn");
+        const swResetBtn = document.getElementById("sw-reset-btn");
+        const lapsList = document.getElementById("laps-list");
+        let swState = {
+          running: false,
+          startTime: 0,
+          elapsedTime: 0,
+          interval: null,
+          laps: [],
+        };
+        const formatSWTime = (ms) => {
+          const date = new Date(ms);
+          const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+          const seconds = String(date.getUTCSeconds()).padStart(2, "0");
+          const milliseconds = String(date.getUTCMilliseconds()).padStart(
+            3,
+            "0"
+          );
+          return `${minutes}:${seconds}.${milliseconds}`;
+        };
+        swStartBtn.addEventListener("click", () => {
+          if (swState.running) {
+            swState.running = false;
+            swState.elapsedTime += performance.now() - swState.startTime;
+            clearInterval(swState.interval);
+            swStartBtn.textContent = "Lanjut";
+            swStartBtn.classList.replace("bg-red-500", "bg-amber-600/80");
+            swLapBtn.disabled = true;
+          } else {
+            swState.running = true;
+            swState.startTime = performance.now();
+            swState.interval = setInterval(() => {
+              const totalElapsed =
+                swState.elapsedTime + (performance.now() - swState.startTime);
+              swDisplay.textContent = formatSWTime(totalElapsed);
+            }, 10);
+            swStartBtn.textContent = "Stop";
+            swStartBtn.classList.replace("bg-amber-600/80", "bg-red-500");
+            swLapBtn.disabled = false;
+            swResetBtn.disabled = false;
+          }
+        });
+        swResetBtn.addEventListener("click", () => {
+          clearInterval(swState.interval);
+          swState = {
+            running: false,
+            startTime: 0,
+            elapsedTime: 0,
+            interval: null,
+            laps: [],
+          };
+          swDisplay.textContent = "00:00:00.000";
+          swStartBtn.textContent = "Mulai";
+          swStartBtn.classList.replace("bg-red-500", "bg-amber-600/80");
+          swLapBtn.disabled = true;
+          swResetBtn.disabled = true;
+          lapsList.innerHTML = "";
+        });
+        swLapBtn.addEventListener("click", () => {
+          if (!swState.running) return;
+          const totalElapsed =
+            swState.elapsedTime + (performance.now() - swState.startTime);
+          const lastLapTime = swState.laps.reduce((acc, lap) => acc + lap, 0);
+          const lapTime = totalElapsed - lastLapTime;
+          swState.laps.push(lapTime);
+          const li = document.createElement("li");
+          li.className = "flex justify-between p-2 rounded-lg bg-black/20";
+          li.innerHTML = `<span>Lap ${
+            swState.laps.length
+          }</span><span class="font-mono">${formatSWTime(lapTime)}</span>`;
+          lapsList.prepend(li);
+        });
+
+        // Timer
+        const timerStartBtn = document.getElementById("timer-start-btn");
+        const timerResetBtn = document.getElementById("timer-reset-btn");
+        const timerDisplay = document.getElementById("timer-display");
+        const timerSetterContainer = document.getElementById(
+          "timer-setter-container"
+        );
+        const timerDisplayContainer = document.getElementById(
+          "timer-display-container"
+        );
+        const timerHoursInput = document.getElementById("timer-hours-input");
+        const timerMinutesInput = document.getElementById(
+          "timer-minutes-input"
+        );
+        const timerSecondsInput = document.getElementById(
+          "timer-seconds-input"
+        );
+        let timerState = { running: false, totalSeconds: 0, interval: null };
+        const formatInputValue = (input) => {
+          const value = parseInt(input.value, 10) || 0;
+          const min = parseInt(input.min, 10);
+          const max = parseInt(input.max, 10);
+          let correctedValue = value;
+          if (value < min) correctedValue = min;
+          if (value > max) correctedValue = max;
+          input.value = String(correctedValue).padStart(2, "0");
+        };
+        [
+          timerHoursInput,
+          timerMinutesInput,
+          timerSecondsInput,
+          document.getElementById("alarm-hours-input"),
+          document.getElementById("alarm-minutes-input"),
+        ].forEach((input) => {
+          input.addEventListener("blur", () => formatInputValue(input));
+          input.addEventListener("input", () => {
+            const max = parseInt(input.max, 10);
+            if (parseInt(input.value, 10) > max) {
+              input.value = String(max);
+            }
+          });
+        });
+        timerStartBtn.addEventListener("click", () => {
+          if (timerState.running) {
+            timerState.running = false;
+            clearInterval(timerState.interval);
+            timerStartBtn.textContent = "Lanjut";
+            timerStartBtn.classList.replace("bg-red-500", "bg-amber-600/80");
+          } else {
+            if (timerState.totalSeconds <= 0) {
+              const h = parseInt(timerHoursInput.value) || 0;
+              const m = parseInt(timerMinutesInput.value) || 0;
+              const s = parseInt(timerSecondsInput.value) || 0;
+              timerState.totalSeconds = h * 3600 + m * 60 + s;
+            }
+            if (timerState.totalSeconds > 0) {
+              timerState.running = true;
+              timerSetterContainer.classList.add("hidden");
+              timerDisplayContainer.classList.remove("hidden");
+              timerStartBtn.textContent = "Pause";
+              timerStartBtn.classList.replace("bg-amber-600/80", "bg-red-500");
+              timerResetBtn.classList.remove("hidden");
+              timerState.interval = setInterval(updateTimer, 1000);
+            }
+          }
+        });
+        timerResetBtn.addEventListener("click", () => {
+          clearInterval(timerState.interval);
+          timerState = { running: false, totalSeconds: 0, interval: null };
+          timerSetterContainer.classList.remove("hidden");
+          timerDisplayContainer.classList.add("hidden");
+          timerStartBtn.textContent = "Mulai";
+          timerStartBtn.classList.replace("bg-red-500", "bg-amber-600/80");
+          timerResetBtn.classList.add("hidden");
+        });
+        const updateTimer = () => {
+          if (timerState.totalSeconds > 0 && timerState.running) {
+            timerState.totalSeconds--;
+            const h = Math.floor(timerState.totalSeconds / 3600);
+            const m = Math.floor((timerState.totalSeconds % 3600) / 60);
+            const s = timerState.totalSeconds % 60;
+            timerDisplay.textContent = `${String(h).padStart(2, "0")}:${String(
+              m
+            ).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+          } else {
+            clearInterval(timerState.interval);
+            timerState.running = false;
+            timerResetBtn.click();
+            showAlarmModal("Waktu timer habis!");
+          }
+        };
+
+        // Alarm
+        const addAlarmBtn = document.getElementById("add-alarm-btn");
+        const alarmLabelInput = document.getElementById("alarm-label-input");
+        const alarmsList = document.getElementById("alarms-list");
+        const alarmHoursInput = document.getElementById("alarm-hours-input");
+        const alarmMinutesInput = document.getElementById(
+          "alarm-minutes-input"
+        );
+        const alarmSoundSelect = document.getElementById("alarm-sound-select");
+        let alarms = JSON.parse(localStorage.getItem("alarms")) || [];
+        let alarmCheckInterval;
+        const renderAlarms = () => {
+          alarmsList.innerHTML = "";
+          alarms.sort((a, b) => a.time.localeCompare(b.time));
+          alarms.forEach((alarm) => {
+            const alarmEl = document.createElement("div");
+            alarmEl.className =
+              "flex items-center justify-between p-3 rounded-lg bg-black/20";
+            alarmEl.dataset.id = alarm.id;
+            const timeParts = alarm.time.split(":");
+            let displayTime = `${timeParts[0]}:${timeParts[1]}`;
+            if (!is24HourFormat) {
+              let hours = parseInt(timeParts[0]);
+              const ampm = hours >= 12 ? "PM" : "AM";
+              hours = hours % 12 || 12;
+              displayTime = `${String(hours).padStart(2, "0")}:${
+                timeParts[1]
+              } ${ampm}`;
+            }
+            alarmEl.innerHTML = `
+                    <div>
+                        <p class="text-2xl font-semibold">${displayTime}</p>
+                        <p class="text-sm text-slate-400">${
+                          alarm.label || "Alarm"
+                        }</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" class="sr-only peer alarm-toggle" ${
+                            alarm.enabled ? "checked" : ""
+                          }>
+                          <div class="w-11 h-6 bg-slate-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-amber-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                        </label>
+                        <button class="remove-alarm-btn text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                    </div>`;
+            alarmsList.appendChild(alarmEl);
+          });
+          lucide.createIcons();
+          localStorage.setItem("alarms", JSON.stringify(alarms));
+        };
+        addAlarmBtn.addEventListener("click", () => {
+          const h = parseInt(alarmHoursInput.value) || 0;
+          const m = parseInt(alarmMinutesInput.value) || 0;
+          const time = `${String(h).padStart(2, "0")}:${String(m).padStart(
+            2,
+            "0"
+          )}`;
+          const sound = alarmSoundSelect.value;
+          alarms.push({
+            id: Date.now(),
+            time,
+            label: alarmLabelInput.value,
+            sound,
+            enabled: true,
+          });
+          alarmLabelInput.value = "";
+          renderAlarms();
+        });
+        alarmsList.addEventListener("click", (e) => {
+          const alarmEl = e.target.closest("[data-id]");
+          if (!alarmEl) return;
+          const id = parseInt(alarmEl.dataset.id);
+          if (e.target.closest(".remove-alarm-btn")) {
+            alarms = alarms.filter((a) => a.id !== id);
+          } else if (e.target.matches(".alarm-toggle")) {
+            const alarm = alarms.find((a) => a.id === id);
+            if (alarm) alarm.enabled = e.target.checked;
+          }
+          renderAlarms();
+        });
+        const showAlarmModal = (message, sound) => {
+          alarmModalMessage.textContent = message;
+          alarmModal.classList.remove("hidden");
+          setTimeout(() => {
+            alarmModal.classList.remove("opacity-0");
+            alarmModal.querySelector("div").classList.remove("scale-95");
+          }, 10);
+          lucide.createIcons();
+          if (alarmSounds[sound] && Tone.context.state === "running") {
+            if (sound === "bell")
+              alarmSounds[sound].triggerAttackRelease("C5", "4n", Tone.now());
+            else if (sound === "harp")
+              alarmSounds[sound].triggerAttackRelease("C4", "8n", Tone.now());
+            else if (sound === "classic")
+              alarmSounds[sound].triggerAttackRelease("A4", "8n", Tone.now());
+            else
+              alarmSounds.default.triggerAttackRelease("C2", "8n", Tone.now());
+          }
+        };
+        const hideAlarmModal = () => {
+          alarmModal.classList.add("opacity-0");
+          alarmModal.querySelector("div").classList.add("scale-95");
+          setTimeout(() => alarmModal.classList.add("hidden"), 300);
+        };
+        const setInitialAlarmTime = () => {
+          const now = new Date();
+          alarmHoursInput.value = String(now.getHours()).padStart(2, "0");
+          alarmMinutesInput.value = String(now.getMinutes()).padStart(2, "0");
+        };
+        alarmModalClose.addEventListener("click", hideAlarmModal);
+        alarmModal.addEventListener("click", (e) => {
+          if (e.target === alarmModal) hideAlarmModal();
+        });
+        const checkAlarms = () => {
+          const now = new Date();
+          const currentTime = `${String(now.getHours()).padStart(
+            2,
+            "0"
+          )}:${String(now.getMinutes()).padStart(2, "0")}`;
+          alarms.forEach((alarm) => {
+            if (
+              alarm.enabled &&
+              alarm.time === currentTime &&
+              now.getSeconds() === 0 &&
+              !alarm.triggeredThisMinute
+            ) {
+              showAlarmModal(
+                alarm.label || "Waktunya!",
+                alarm.sound || "default"
+              );
+              alarm.triggeredThisMinute = true;
+            }
+            if (alarm.time !== currentTime) {
+              alarm.triggeredThisMinute = false;
+            }
+          });
+        };
+
+        // --- Initial Load ---
+        function debounce(func, wait) {
+          let timeout;
+          return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+          };
+        }
+
+        addClock("Asia/Jakarta");
+        updateTimezoneDropdown();
+        setupMainCanvas();
+        startClockUpdates();
+        renderAlarms();
+        setInitialAlarmTime();
+        alarmCheckInterval = setInterval(checkAlarms, 1000);
+        window.addEventListener("resize", debounce(setupMainCanvas, 250));
+
+        // Converter Logic
+        const converterFromSelect = document.getElementById(
+          "converter-from-select"
+        );
+        const converterToSelect = document.getElementById(
+          "converter-to-select"
+        );
+        const converterFromTime = document.getElementById(
+          "converter-from-time"
+        );
+        const converterToTime = document.getElementById("converter-to-time");
+
+        function populateConverterDropdowns() {
+          [converterFromSelect, converterToSelect].forEach((select) => {
+            select.innerHTML = "";
+            popularTimezones
+              .sort((a, b) => a.city.localeCompare(b.city))
+              .forEach((tz) => {
+                const option = document.createElement("option");
+                option.value = tz.timezone;
+                option.textContent = `${tz.city}, ${tz.country}`;
+                select.appendChild(option);
+              });
+          });
+          converterFromSelect.value = "Asia/Jakarta";
+          converterToSelect.value = "America/New_York";
+          const now = new Date();
+          converterFromTime.value = `${String(now.getHours()).padStart(
+            2,
+            "0"
+          )}:${String(now.getMinutes()).padStart(2, "0")}`;
+        }
+
+        function handleTimeConversion() {
+          const fromTz = converterFromSelect.value;
+          const toTz = converterToSelect.value;
+          const timeParts = converterFromTime.value.split(":");
+
+          if (timeParts.length < 2) return;
+
+          const today = new Date();
+          const year = today.getFullYear();
+          const month = today.getMonth();
+          const day = today.getDate();
+          const timeInUTC = new Date(
+            Date.UTC(
+              year,
+              month,
+              day,
+              parseInt(timeParts[0], 10),
+              parseInt(timeParts[1], 10)
+            )
+          );
+          const fromOffset =
+            new Date(
+              timeInUTC.toLocaleString("en-US", { timeZone: fromTz })
+            ).getTime() - timeInUTC.getTime();
+          const actualUTCTime = new Date(timeInUTC.getTime() - fromOffset);
+          const toTimeFormatter = new Intl.DateTimeFormat("en-US", {
+            timeZone: toTz,
+            hour12: false,
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+          converterToTime.textContent = toTimeFormatter.format(actualUTCTime);
+        }
+
+        [converterFromSelect, converterToSelect, converterFromTime].forEach(
+          (el) => {
+            el.addEventListener("change", handleTimeConversion);
+          }
+        );
+
+        populateConverterDropdowns();
+        handleTimeConversion();
+
+        // Author Modal Logic
+        const showAuthorModal = () => {
+          authorModal.classList.remove("hidden");
+          setTimeout(() => {
+            authorModal.classList.remove("opacity-0");
+            authorModal.querySelector("div").classList.remove("scale-95");
+          }, 10);
+          lucide.createIcons();
+        };
+
+        const hideAuthorModal = () => {
+          authorModal.classList.add("opacity-0");
+          authorModal.querySelector("div").classList.add("scale-95");
+          setTimeout(() => authorModal.classList.add("hidden"), 300);
+        };
+
+        authorWatermark.addEventListener("click", showAuthorModal);
+        authorModalClose.addEventListener("click", hideAuthorModal);
+        authorModal.addEventListener("click", (e) => {
+          if (e.target === authorModal) hideAuthorModal();
+        });
+      });
+    </script>
+  </body>
+</html>
