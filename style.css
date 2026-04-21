@@ -1,0 +1,150 @@
+:root {
+  --accent: #c8a96a;
+}
+
+* {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body {
+  background-color: #0b0f14;
+  color: #e5e7eb;
+  font-family: "Inter", sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+.heading-tracking {
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Hide Number Spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Buttons */
+.btn-flat {
+  background-color: #1a2230;
+  border: 1px solid #1f2937;
+  color: #e5e7eb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-flat:hover:not(:disabled) {
+  background-color: #1f2937;
+  border-color: #c8a96a;
+}
+
+.btn-accent {
+  background-color: #c8a96a;
+  color: #0b0f14;
+  border: 1px solid #c8a96a;
+}
+
+.btn-accent:hover:not(:disabled) {
+  background-color: #d4af7a;
+}
+
+.btn-danger {
+  background-color: rgba(153, 27, 27, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+/* Sidebar Tabs */
+.tab-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 1rem;
+  color: #6b7280;
+  border-left: 2px solid transparent;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  color: #e5e7eb;
+  background-color: rgba(26, 34, 48, 0.5);
+}
+
+.tab-active {
+  color: #c8a96a;
+  border-left-color: #c8a96a;
+  background-color: #111827;
+}
+
+/* Select */
+.select-flat {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+}
+
+/* Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0b0f14;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #1f2937;
+}
+
+/* Clock Cards */
+.clock-card {
+  border-top: 2px solid transparent;
+}
+
+.clock-card.active-tz {
+  border-top-color: #c8a96a;
+  background-color: rgba(200, 169, 106, 0.05);
+}
+
+/* Animations */
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fade 0.3s ease-in-out;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.animate-blink {
+  animation: blink 2s infinite;
+}
